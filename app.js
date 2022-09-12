@@ -13,6 +13,7 @@ const app = express();
 
 app.use(cors());
 
+app.use(requestLogger);
 app.use(helmet());
 app.use(limiter);
 
@@ -23,7 +24,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/', require('./routes/index'));
 
-app.use(requestLogger);
 app.use(errorLogger);
 
 app.use(errors());

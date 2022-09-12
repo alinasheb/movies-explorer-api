@@ -15,14 +15,9 @@ const getUserMe = (req, res, next) => {
       throw new NotFound('Пользователь с таким id не найден');
     })
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequest('Некорректные данные'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
+
 // обновляет информацию о пользователе (PATCH /users/me)
 const updateUser = (req, res, next) => {
   const { name, email } = req.body;
@@ -34,6 +29,8 @@ const updateUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequest('Некорректные данные'));
+      } else if (err.name === 'MongoServerError' && err.code === 11000) {
+        throw new ConflictingRequest('Пользователь с таким email уже существует');
       } else {
         next(err);
       }
@@ -56,7 +53,9 @@ const createUser = (req, res, next) => {
     .then((user) => User.findOne({ _id: user._id }))
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'MongoServerError' && err.code === 11000) {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Некорректные данные'));
+      } else if (err.name === 'MongoServerError' && err.code === 11000) {
         next(new ConflictingRequest('Email уже существует'));
       } else {
         next(err);

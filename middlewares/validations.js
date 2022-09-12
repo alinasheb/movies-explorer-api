@@ -1,4 +1,5 @@
 const { celebrate, Joi } = require('celebrate');
+const { isURL } = require('validator');
 
 const createUserValidation = celebrate({
   body: Joi.object().keys({
@@ -29,9 +30,24 @@ const createMovieValidation = celebrate({
     duration: Joi.number().required(),
     year: Joi.string().required().min(4).length(4),
     description: Joi.string().required(),
-    image: Joi.string().required().pattern(/https?:\/\/(www\.)?[a-zA-Z\d\-.]{1,}\.[a-z]{1,6}([/a-z0-9\-._~:?#[\]@!$&'()*+,;=]*)/),
-    trailerLink: Joi.string().required().pattern(/https?:\/\/(www\.)?[a-zA-Z\d\-.]{1,}\.[a-z]{1,6}([/a-z0-9\-._~:?#[\]@!$&'()*+,;=]*)/),
-    thumbnail: Joi.string().required().pattern(/https?:\/\/(www\.)?[a-zA-Z\d\-.]{1,}\.[a-z]{1,6}([/a-z0-9\-._~:?#[\]@!$&'()*+,;=]*)/),
+    image: Joi.string().required().custom((value, helpers) => {
+      if (isURL(value)) {
+        return value;
+      }
+      return helpers.message('Некорректная ссылка');
+    }),
+    trailerLink: Joi.string().required().custom((value, helpers) => {
+      if (isURL(value)) {
+        return value;
+      }
+      return helpers.message('Некорректная ссылка');
+    }),
+    thumbnail: Joi.string().required().custom((value, helpers) => {
+      if (isURL(value)) {
+        return value;
+      }
+      return helpers.message('Некорректная ссылка');
+    }),
     movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
@@ -41,7 +57,7 @@ const createMovieValidation = celebrate({
 
 const deleteMovieValidation = celebrate({
   params: Joi.object().keys({
-    movieId: Joi.string().length(24).required().hex(),
+    _id: Joi.string().length(24).required().hex(),
   }),
 });
 
